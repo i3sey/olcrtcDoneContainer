@@ -1,7 +1,7 @@
 # Быстрый старт (через скрипты)
 
 Этот способ самый простой. Тебе не нужен Go, не нужно ничего компилировать.
-Серверный скрипт всё сделает сам: скачает готовый образ из GHCR и запустит.
+Серверный и клиентский скрипты скачивают готовый образ из GitHub Releases и загружают его в Podman.
 Сборка контейнера происходит в GitHub Actions.
 
 Проект в бете. По проблемам: t.me/openlibrecommunity
@@ -41,7 +41,7 @@ dnf install curl      # Fedora
 ## Шаг 1: Скачать репозиторий
 
 ```sh
-git clone https://github.com/openlibrecommunity/olcrtc --recurse-submodules
+git clone https://github.com/i3sey/olcrtcDoneContainer --recurse-submodules
 cd olcrtc
 ```
 
@@ -55,8 +55,8 @@ cd olcrtc
 ./script/srv.sh
 ```
 
-По умолчанию скрипт берет образ `ghcr.io/openlibrecommunity/olcrtc:latest`.
-Если нужно подменить его, задай `OLCRTC_IMAGE` или передай `--image=...`.
+По умолчанию скрипт скачивает архив для своей архитектуры из `releases/latest`.
+Если нужно подменить источник, задай `OLCRTC_IMAGE_ARCHIVE_URL_BASE` или передай `--image-archive-url-base=...`.
 
 Скрипт задаст несколько вопросов. Отвечай Enter если устраивает значение по умолчанию.
 
@@ -148,7 +148,7 @@ Encryption key: 4fc9ab159c0268a12766be00c0a85138df5905f72c5eb5780c380507ebe0174d
 На своей машине (домашний ПК, ноутбук):
 
 ```sh
-git clone https://github.com/openlibrecommunity/olcrtc --recurse-submodules
+git clone https://github.com/i3sey/olcrtcDoneContainer --recurse-submodules
 cd olcrtc
 ./script/cnc.sh
 ```

@@ -17,7 +17,7 @@ Project that allows users to bypass blocking by parasitizing and tunneling on un
 
 Beta
 <br>
-See all info in [issues](https://github.com/openlibrecommunity/olcrtc/issues)
+See all info in [issues](https://github.com/i3sey/olcrtcDoneContainer/issues)
 <br>
 Issues? contact us at [@openlibrecommunity](https://t.me/openlibrecommunity)
 <br>
@@ -55,7 +55,7 @@ mage cross
 mage mobile
 
 # container image
-GitHub Actions публикует готовый образ в GHCR после push в `main` / `master`.
+GitHub Actions публикует готовые архивы образа в GitHub Releases после push в `main` / `master`.
 Локально собрать образ все еще можно через:
 
 ```bash
@@ -66,7 +66,7 @@ mage docker
 На сервере используй готовый образ:
 
 ```bash
-podman pull ghcr.io/openlibrecommunity/olcrtc:latest
+./script/srv.sh
 ```
 
 # lint / test / clean

@@ -97,7 +97,7 @@ mage --version
 ## Шаг 4: Скачать репозиторий
 
 ```sh
-git clone https://github.com/openlibrecommunity/olcrtc --recurse-submodules
+git clone https://github.com/i3sey/olcrtcDoneContainer --recurse-submodules
 cd olcrtc
 ```
 

@@ -6,18 +6,24 @@ echo "ЕСЛИ У ВАС ЕСТЬ ПРОБЛЕМЫ - Я В КУРСЕ, ПРОЕ�
 set -e
 
 CONTAINER_NAME="olcrtc-client"
-IMAGE_NAME="docker.io/library/golang:1.26-alpine"
-REPO_URL="https://github.com/openlibrecommunity/olcrtc.git"
-WORK_DIR="/tmp/olcrtc-client"
+IMAGE_NAME="${OLCRTC_IMAGE:-olcrtc:latest}"
+IMAGE_ARCHIVE_URL_BASE="${OLCRTC_IMAGE_ARCHIVE_URL_BASE:-https://github.com/i3sey/olcrtcDoneContainer/releases/latest/download}"
 
 SOCKS_IP="127.0.0.1"
 SOCKS_PORT="8808"
-BRANCH="master"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --image=*)
+            IMAGE_NAME="${1#*=}"
+            shift
+            ;;
+        --image-archive-url-base=*)
+            IMAGE_ARCHIVE_URL_BASE="${1#*=}"
+            shift
+            ;;
         --branch=*)
-            BRANCH="${1#*=}"
+            echo "[!] --branch is deprecated; set OLCRTC_IMAGE or use --image instead"
             shift
             ;;
         *)
@@ -28,7 +34,7 @@ done
 
 echo "=== OlcRTC Client Deployment Script ==="
 echo ""
-echo "[*] Using branch: $BRANCH"
+echo "[*] Using image: $IMAGE_NAME"
 echo ""
 
 if ! command -v podman &> /dev/null; then
@@ -223,26 +229,39 @@ echo "[*] Stopping old instance..."
 podman stop $CONTAINER_NAME 2>/dev/null || true
 podman rm $CONTAINER_NAME 2>/dev/null || true
 
-echo "[*] Cleaning workspace..."
-rm -rf $WORK_DIR
-mkdir -p $WORK_DIR
+if [ -z "${OLCRTC_IMAGE:-}" ]; then
+    ARCH="$(uname -m)"
+    case "$ARCH" in
+        x86_64|amd64)
+            ARCH="amd64"
+            ;;
+        aarch64|arm64)
+            ARCH="arm64"
+            ;;
+        *)
+            echo "[X] Unsupported architecture: $ARCH"
+            exit 1
+            ;;
+    esac
 
-echo "[*] Cloning repository..."
-git clone --depth 1 --recurse-submodules --branch "$BRANCH" $REPO_URL $WORK_DIR
+    IMAGE_TAR="$(mktemp -t olcrtc-image-XXXXXX.tar)"
 
-echo "[*] Pulling Go image..."
-podman pull $IMAGE_NAME
+    echo "[*] Downloading prebuilt image for $ARCH..."
+    if command -v curl &> /dev/null; then
+        curl -fL --retry 3 --retry-delay 2 -o "$IMAGE_TAR" "$IMAGE_ARCHIVE_URL_BASE/olcrtc-$ARCH.tar"
+    elif command -v wget &> /dev/null; then
+        wget -O "$IMAGE_TAR" "$IMAGE_ARCHIVE_URL_BASE/olcrtc-$ARCH.tar"
+    else
+        echo "[X] Need curl or wget to download the prebuilt image"
+        exit 1
+    fi
 
-echo "[*] Building OlcRTC..."
-podman run --rm \
-    -v $WORK_DIR:/app:Z \
-    -w /app \
-    $IMAGE_NAME \
-    sh -c "go mod tidy && go build -o olcrtc cmd/olcrtc/main.go"
-
-if [ ! -f "$WORK_DIR/olcrtc" ]; then
-    echo "[X] Build failed"
-    exit 1
+    echo "[*] Loading image into Podman..."
+    podman load -i "$IMAGE_TAR"
+    rm -f "$IMAGE_TAR"
+else
+    echo "[*] Pulling image..."
+    podman pull "$IMAGE_NAME"
 fi
 
 echo "[*] Starting OlcRTC client..."
@@ -250,10 +269,8 @@ podman run -d \
     --name $CONTAINER_NAME \
     --restart unless-stopped \
     -p $SOCKS_IP:$SOCKS_PORT:$SOCKS_PORT \
-    -v $WORK_DIR:/app:Z \
-    -w /app \
     $IMAGE_NAME \
-    ./olcrtc -mode cnc -carrier "$CARRIER" -id "$ROOM_ID" -key "$KEY" \
+    olcrtc -mode cnc -carrier "$CARRIER" -id "$ROOM_ID" -key "$KEY" \
         -link direct -transport "$TRANSPORT" -dns "$DNS" -data data \
         -socks-host 0.0.0.0 -socks-port "$SOCKS_PORT" "${TRANSPORT_ARGS[@]}"
 

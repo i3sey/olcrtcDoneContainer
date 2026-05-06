@@ -1,6 +1,6 @@
 services:
   olcrtc-server:
-    image: ${OLCRTC_IMAGE:-ghcr.io/openlibrecommunity/olcrtc:latest}
+    image: ${OLCRTC_IMAGE:-ghcr.io/i3sey/olcrtcdonecontainer:latest}
     container_name: olcrtc-server
     restart: unless-stopped
     environment:
