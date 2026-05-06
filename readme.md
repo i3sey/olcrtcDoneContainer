@@ -55,7 +55,7 @@ mage cross
 mage mobile
 
 # container image
-GitHub Actions публикует готовые архивы образа в GitHub Releases после push в `main` / `master`.
+GitHub Actions публикует готовый образ в GHCR после push в `main` / `master`.
 Локально собрать образ все еще можно через:
 
 ```bash
