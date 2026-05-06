@@ -55,8 +55,19 @@ mage cross
 mage mobile
 
 # container image
+GitHub Actions публикует готовый образ в GHCR после push в `main` / `master`.
+Локально собрать образ все еще можно через:
+
+```bash
 mage podman
 mage docker
+```
+
+На сервере используй готовый образ:
+
+```bash
+podman pull ghcr.io/openlibrecommunity/olcrtc:latest
+```
 
 # lint / test / clean
 mage lint
